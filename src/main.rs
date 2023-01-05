@@ -142,7 +142,7 @@ fn format_duration(duration: &Duration) -> String {
     let seconds = duration.num_seconds() % 60;
     let minutes = (duration.num_seconds() / 60) % 60;
     let hours = (duration.num_seconds() / 60) / 60;
-    format!("{}:{}:{}", hours, minutes, seconds)
+    format!("{:02}:{:02}:{:02}", hours, minutes, seconds)
 }
 
 #[cfg(test)]
@@ -155,7 +155,7 @@ mod tests {
 
 
     #[test]
-    fn creates_cliinterval() {
+    fn creates_display_interval() {
         let interval = Interval {
             start: NaiveDateTime::default().add(Duration::hours(10)),
             stop: Some(NaiveDateTime::default().add(Duration::hours(12))),
@@ -163,7 +163,7 @@ mod tests {
         let expected = DisplayInterval {
             start: NaiveDateTime::default().add(Duration::hours(10)).to_string(),
             stop: NaiveDateTime::default().add(Duration::hours(12)).to_string(),
-            duration: "2:0:0".to_string(),
+            duration: "02:00:00".to_string(),
         };
 
         let cli_interval = DisplayInterval::from_interval(&interval);
@@ -189,6 +189,14 @@ mod tests {
         };
 
         assert_eq!(interval.calculate_duration(), Duration::hours(2));
+    }
+
+    #[test]
+    fn formats_duration() {
+        let duration = Duration::seconds(3661);
+
+        let formatted_duration = format_duration(&duration);
+        assert_eq!(formatted_duration, "01:01:01");
     }
 
     #[test]
