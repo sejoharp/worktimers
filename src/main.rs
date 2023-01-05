@@ -115,7 +115,7 @@ fn read_file(path: &str) -> String {
 }
 
 fn read_intervals() -> Vec<Interval> {
-    let input = read_file("/Users/Joscha.Harpeng/private/worktimers/tests/resources/workingtimes-full-intervals.json");
+    let input = read_file("tests/resources/workingtimes-full-intervals.json");
 
     Interval::parse_intervals(input)
 }
