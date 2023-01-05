@@ -33,8 +33,18 @@ struct CliInterval {
 
 impl CliInterval {
     pub fn from_interval(interval: &Interval) -> CliInterval {
-        let end = interval.stop.map_or_else(|| "".to_string(), |end_date| end_date.to_string());
-        CliInterval { start: interval.start.to_string(), stop: end }
+        match interval.stop {
+            Some(end) => CliInterval {
+                start: interval.start.to_string(),
+                stop: end.to_string(),
+                duration: format_duration(&interval.calculate_duration()),
+            },
+            None => CliInterval {
+                start: interval.start.to_string(),
+                stop: "".to_string(),
+                duration: format_duration(&interval.calculate_duration()),
+            }
+        }
     }
     pub fn from_intervals(intervals: Vec<Interval>) -> Vec<CliInterval> {
         intervals
@@ -123,9 +133,16 @@ fn save_to_file(intervals: &Vec<Interval>) {
     ).expect(format!("Failed to save the intervals to {}", path).as_str())
 }
 
+fn format_duration(duration: &Duration) -> String {
+    let seconds = duration.num_seconds() % 60;
+    let minutes = (duration.num_seconds() / 60) % 60;
+    let hours = (duration.num_seconds() / 60) / 60;
+    format!("{}:{}:{}", hours, minutes, seconds)
+}
+
 #[cfg(test)]
 mod tests {
-    use std::ops::Add;
+    use std::ops::{Add, Sub};
 
     use chrono::{Duration, NaiveDateTime};
 
@@ -141,18 +158,29 @@ mod tests {
         let expected = CliInterval {
             start: NaiveDateTime::default().add(Duration::hours(10)).to_string(),
             stop: NaiveDateTime::default().add(Duration::hours(12)).to_string(),
-            duration: "".to_string(),
+            duration: "2:0:0".to_string(),
         };
 
         let cli_interval = CliInterval::from_interval(&interval);
-        assert_eq!(cli_interval, actual
-        }
+
+        assert_eq!(cli_interval, expected)
+    }
 
     #[test]
     fn calculates_duation() {
         let interval = Interval {
             start: NaiveDateTime::default().add(Duration::hours(10)),
             stop: Some(NaiveDateTime::default().add(Duration::hours(12))),
+        };
+
+        assert_eq!(interval.calculate_duration(), Duration::hours(2));
+    }
+
+    #[test]
+    fn calculates_duation_if_interval_is_ongoing() {
+        let interval = Interval {
+            start: now().sub(Duration::hours(2)),
+            stop: None,
         };
 
         assert_eq!(interval.calculate_duration(), Duration::hours(2));
