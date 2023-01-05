@@ -25,34 +25,34 @@ impl Interval {
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Tabled)]
-struct CliInterval {
+struct DisplayInterval {
     start: String,
     stop: String,
     duration: String,
 }
 
-impl CliInterval {
-    pub fn from_interval(interval: &Interval) -> CliInterval {
+impl DisplayInterval {
+    pub fn from_interval(interval: &Interval) -> DisplayInterval {
         match interval.stop {
-            Some(end) => CliInterval {
+            Some(end) => DisplayInterval {
                 start: interval.start.to_string(),
                 stop: end.to_string(),
                 duration: format_duration(&interval.calculate_duration()),
             },
-            None => CliInterval {
+            None => DisplayInterval {
                 start: interval.start.to_string(),
                 stop: "".to_string(),
                 duration: format_duration(&interval.calculate_duration()),
             }
         }
     }
-    pub fn from_intervals(intervals: Vec<Interval>) -> Vec<CliInterval> {
+    pub fn from_intervals(intervals: Vec<Interval>) -> Vec<DisplayInterval> {
         intervals
             .iter()
-            .map(CliInterval::from_interval)
+            .map(DisplayInterval::from_interval)
             .collect()
     }
-    pub fn print(cli_intervals: Vec<CliInterval>) {
+    pub fn print(cli_intervals: Vec<DisplayInterval>) {
         let mut table = Table::new(cli_intervals);
         table.with(Style::modern());
         println!("{}", table.to_string());
@@ -121,8 +121,8 @@ fn read_intervals() -> Vec<Interval> {
 }
 
 fn print_intervals(intervals: Vec<Interval>) {
-    let cli_intervals: Vec<CliInterval> = CliInterval::from_intervals(intervals);
-    CliInterval::print(cli_intervals);
+    let cli_intervals: Vec<DisplayInterval> = DisplayInterval::from_intervals(intervals);
+    DisplayInterval::print(cli_intervals);
 }
 
 fn save_to_file(intervals: &Vec<Interval>) {
@@ -155,13 +155,13 @@ mod tests {
             start: NaiveDateTime::default().add(Duration::hours(10)),
             stop: Some(NaiveDateTime::default().add(Duration::hours(12))),
         };
-        let expected = CliInterval {
+        let expected = DisplayInterval {
             start: NaiveDateTime::default().add(Duration::hours(10)).to_string(),
             stop: NaiveDateTime::default().add(Duration::hours(12)).to_string(),
             duration: "2:0:0".to_string(),
         };
 
-        let cli_interval = CliInterval::from_interval(&interval);
+        let cli_interval = DisplayInterval::from_interval(&interval);
 
         assert_eq!(cli_interval, expected)
     }
