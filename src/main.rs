@@ -114,8 +114,13 @@ fn read_file(path: &str) -> String {
     fs::read_to_string(path).expect(format!("failed to read {}", path).as_str())
 }
 
+fn get_persistance_path() -> String {
+    let home_directory = std::env::var("HOME").unwrap();
+    format!("{}/{}", home_directory, "workingtimes.json")
+}
+
 fn read_intervals() -> Vec<Interval> {
-    let input = read_file("tests/resources/workingtimes-full-intervals.json");
+    let input = read_file(get_persistance_path().as_str());
 
     Interval::parse_intervals(input)
 }
@@ -126,9 +131,9 @@ fn print_intervals(intervals: Vec<Interval>) {
 }
 
 fn save_to_file(intervals: &Vec<Interval>) {
-    let path = "tests/resources/workingtimes-full-intervals.json";
+    let path = get_persistance_path();
     fs::write(
-        path,
+        path.clone(),
         serde_json::to_string_pretty(&intervals).unwrap(),
     ).expect(format!("Failed to save the intervals to {}", path).as_str())
 }
