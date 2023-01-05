@@ -11,12 +11,12 @@ use tabled::{Style, Table, Tabled};
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
 struct Interval {
     start: NaiveDateTime,
-    end: Option<NaiveDateTime>,
+    stop: Option<NaiveDateTime>,
 }
 
 impl Interval {
     fn calculate_duration(&self) -> Duration {
-        self.end.unwrap_or(now()).signed_duration_since(self.start)
+        self.stop.unwrap_or(now()).signed_duration_since(self.start)
     }
     fn parse_intervals(json_data: String) -> Vec<Interval> {
         let error_message = format!("failed to parse {}", json_data);
@@ -27,13 +27,14 @@ impl Interval {
 #[derive(Serialize, Deserialize, Debug, PartialEq, Tabled)]
 struct CliInterval {
     start: String,
-    end: String,
+    stop: String,
+    duration: String,
 }
 
 impl CliInterval {
     pub fn from_interval(interval: &Interval) -> CliInterval {
-        let end = interval.end.map_or_else(|| "".to_string(), |end_date| end_date.to_string());
-        CliInterval { start: interval.start.to_string(), end: end }
+        let end = interval.stop.map_or_else(|| "".to_string(), |end_date| end_date.to_string());
+        CliInterval { start: interval.start.to_string(), stop: end }
     }
     pub fn from_intervals(intervals: Vec<Interval>) -> Vec<CliInterval> {
         intervals
@@ -81,12 +82,12 @@ fn main() {
 }
 
 fn start_command(intervals: &mut Vec<Interval>) {
-    intervals.push(Interval { start: now(), end: None });
+    intervals.push(Interval { start: now(), stop: None });
 }
 
 fn stop_command(intervals: &mut Vec<Interval>) {
     if let Some(interval) = intervals.pop() {
-        intervals.push(Interval { start: interval.start, end: Some(now()) });
+        intervals.push(Interval { start: interval.start, stop: Some(now()) });
     }
 }
 
@@ -130,11 +131,28 @@ mod tests {
 
     use super::*;
 
+
+    #[test]
+    fn creates_cliinterval() {
+        let interval = Interval {
+            start: NaiveDateTime::default().add(Duration::hours(10)),
+            stop: Some(NaiveDateTime::default().add(Duration::hours(12))),
+        };
+        let expected = CliInterval {
+            start: NaiveDateTime::default().add(Duration::hours(10)).to_string(),
+            stop: NaiveDateTime::default().add(Duration::hours(12)).to_string(),
+            duration: "".to_string(),
+        };
+
+        let cli_interval = CliInterval::from_interval(&interval);
+        assert_eq!(cli_interval, actual
+        }
+
     #[test]
     fn calculates_duation() {
         let interval = Interval {
             start: NaiveDateTime::default().add(Duration::hours(10)),
-            end: Some(NaiveDateTime::default().add(Duration::hours(12))),
+            stop: Some(NaiveDateTime::default().add(Duration::hours(12))),
         };
 
         assert_eq!(interval.calculate_duration(), Duration::hours(2));
@@ -152,8 +170,8 @@ mod tests {
     #[test]
     fn prints_intervals() {
         let sample_intervals = vec![
-            Interval { start: NaiveDateTime::default(), end: Some(NaiveDateTime::default().add(Duration::hours(2))) },
-            Interval { start: NaiveDateTime::default().add(Duration::hours(8)), end: None }];
+            Interval { start: NaiveDateTime::default(), stop: Some(NaiveDateTime::default().add(Duration::hours(2))) },
+            Interval { start: NaiveDateTime::default().add(Duration::hours(8)), stop: None }];
 
         print_intervals(sample_intervals);
     }
