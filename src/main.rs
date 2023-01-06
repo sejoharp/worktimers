@@ -1,6 +1,7 @@
 extern crate itertools;
 
 use std::fs;
+use std::ops::Sub;
 
 use chrono::{Duration, Local, NaiveDateTime, Timelike};
 use clap::{command, Command};
@@ -15,9 +16,13 @@ struct Interval {
 }
 
 impl Interval {
-    fn calculate_duration(&self) -> Duration {
-        self.stop.unwrap_or(now()).signed_duration_since(self.start)
+    fn calculate_duration(&self, lunch_break_duration: Option<Duration>) -> Duration {
+        self.stop
+            .unwrap_or(now())
+            .signed_duration_since(self.start)
+            .sub(lunch_break_duration.unwrap_or(Duration::minutes(0)))
     }
+
     fn parse_intervals(json_data: String) -> Vec<Interval> {
         let error_message = format!("failed to parse {}", json_data);
         return serde_json::from_str(json_data.as_str()).expect(error_message.as_str());
@@ -32,24 +37,24 @@ struct DisplayInterval {
 }
 
 impl DisplayInterval {
-    pub fn from_interval(interval: &Interval) -> DisplayInterval {
+    pub fn from_interval(interval: &Interval, lunch_break: Option<Duration>) -> DisplayInterval {
         match interval.stop {
             Some(stop) => DisplayInterval {
                 start: interval.start.to_string(),
                 stop: stop.to_string(),
-                duration: format_duration(&interval.calculate_duration()),
+                duration: format_duration(&interval.calculate_duration(lunch_break)),
             },
             None => DisplayInterval {
                 start: interval.start.to_string(),
                 stop: "".to_string(),
-                duration: format_duration(&interval.calculate_duration()),
+                duration: format_duration(&interval.calculate_duration(lunch_break)),
             }
         }
     }
-    pub fn from_intervals(intervals: Vec<Interval>) -> Vec<DisplayInterval> {
+    pub fn from_intervals(intervals: Vec<Interval>, lunch_break: Option<Duration>) -> Vec<DisplayInterval> {
         intervals
             .iter()
-            .map(DisplayInterval::from_interval)
+            .map(|interval| DisplayInterval::from_interval(&interval, lunch_break))
             .collect()
     }
     pub fn print(cli_intervals: Vec<DisplayInterval>) {
@@ -103,7 +108,7 @@ fn stop_command(intervals: &mut Vec<Interval>) {
 
 fn list_command() {
     let intervals = read_intervals();
-    print_intervals(intervals);
+    print_intervals(intervals, Some(get_lunch_break_duration()));
 }
 
 fn now() -> NaiveDateTime {
@@ -112,6 +117,10 @@ fn now() -> NaiveDateTime {
 
 fn read_file(path: &str) -> String {
     fs::read_to_string(path).expect(format!("failed to read {}", path).as_str())
+}
+
+fn get_lunch_break_duration() -> Duration {
+    Duration::minutes(50)
 }
 
 fn get_persistance_path() -> String {
@@ -125,8 +134,8 @@ fn read_intervals() -> Vec<Interval> {
     Interval::parse_intervals(input)
 }
 
-fn print_intervals(intervals: Vec<Interval>) {
-    let cli_intervals: Vec<DisplayInterval> = DisplayInterval::from_intervals(intervals);
+fn print_intervals(intervals: Vec<Interval>, lunch_break: Option<Duration>) {
+    let cli_intervals: Vec<DisplayInterval> = DisplayInterval::from_intervals(intervals, lunch_break);
     DisplayInterval::print(cli_intervals);
 }
 
@@ -166,9 +175,21 @@ mod tests {
             duration: "02:00:00".to_string(),
         };
 
-        let cli_interval = DisplayInterval::from_interval(&interval);
+        let cli_interval = DisplayInterval::from_interval(&interval, None);
 
         assert_eq!(cli_interval, expected)
+    }
+
+    #[test]
+    fn calculates_duation_with_lunch_break() {
+        let interval = Interval {
+            start: NaiveDateTime::default().add(Duration::hours(10)),
+            stop: Some(NaiveDateTime::default().add(Duration::hours(12))),
+        };
+
+        let expected = Duration::hours(2).sub(Duration::minutes(30));
+
+        assert_eq!(interval.calculate_duration(Some(Duration::minutes(30))), expected);
     }
 
     #[test]
@@ -178,7 +199,7 @@ mod tests {
             stop: Some(NaiveDateTime::default().add(Duration::hours(12))),
         };
 
-        assert_eq!(interval.calculate_duration(), Duration::hours(2));
+        assert_eq!(interval.calculate_duration(None), Duration::hours(2));
     }
 
     #[test]
@@ -188,7 +209,7 @@ mod tests {
             stop: None,
         };
 
-        assert_eq!(interval.calculate_duration(), Duration::hours(2));
+        assert_eq!(interval.calculate_duration(None), Duration::hours(2));
     }
 
     #[test]
@@ -212,8 +233,8 @@ mod tests {
     fn prints_intervals() {
         let sample_intervals = vec![
             Interval { start: NaiveDateTime::default(), stop: Some(NaiveDateTime::default().add(Duration::hours(2))) },
-            Interval { start: NaiveDateTime::default().add(Duration::hours(8)), stop: None }];
+            Interval { start: now().sub(Duration::hours(8)), stop: None }];
 
-        print_intervals(sample_intervals);
+        print_intervals(sample_intervals, None);
     }
 }
