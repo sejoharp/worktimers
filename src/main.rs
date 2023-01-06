@@ -34,9 +34,9 @@ struct DisplayInterval {
 impl DisplayInterval {
     pub fn from_interval(interval: &Interval) -> DisplayInterval {
         match interval.stop {
-            Some(end) => DisplayInterval {
+            Some(stop) => DisplayInterval {
                 start: interval.start.to_string(),
-                stop: end.to_string(),
+                stop: stop.to_string(),
                 duration: format_duration(&interval.calculate_duration()),
             },
             None => DisplayInterval {
