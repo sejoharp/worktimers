@@ -2,19 +2,30 @@
 It's a cli tool to manages work times.
 
 ## Usage
-start working: 
+### start working
+It uses the current timestamp as start date and [lists worked intervals](#list-worked-intervals).
 ```shell
 worktimers start
 ```
 
-stop working: 
+### stop working 
 ```shell
 worktimers stop
 ```
 
-list work times:
+### list worked intervals
 ```shell
 worktimers list
+```
+The output will look like this:
+```
+┌─────────────────────┬─────────────────────┬──────────┐
+│ start               │ stop                │ duration │
+├─────────────────────┼─────────────────────┼──────────┤
+│ 1970-01-01 00:00:00 │ 1970-01-01 02:00:00 │ 02:00:00 │
+├─────────────────────┼─────────────────────┼──────────┤
+│ 2023-01-07 06:23:19 │                     │ 08:00:00 │
+└─────────────────────┴─────────────────────┴──────────┘
 ```
 
 ## Installation
