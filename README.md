@@ -9,6 +9,7 @@ worktimers start
 ```
 
 ### stop working 
+It closes the current interval with the current date and [lists worked intervals](#list-worked-intervals).
 ```shell
 worktimers stop
 ```
