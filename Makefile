@@ -1,7 +1,7 @@
 .DEFAULT_GOAL:= help
 
 .PHONY:dependencies 
-dependencies: ## download and install dependencies
+dependencies: ## downloads and installs dependencies
 	cargo update
 
 .PHONY:test 
@@ -9,15 +9,15 @@ test: ## executes tests
 	cargo test
 
 .PHONY:build
-build: ## build release
+build: ## builds release
 	cargo build
 
 .PHONY:release
-release: ## build release
+release: ## builds release
 	cargo build --release
 
 .PHONY: install
-install: release ## builds and installs workflow in alfred
+install: release ## builds and installs `worktimers` binary into ~/bin directory
 	cp target/release/worktimers ~/bin/worktimers
 
 .PHONY: help	
