@@ -9,11 +9,11 @@ test: ## executes tests
 	cargo test
 
 .PHONY:build
-build: ## builds release
+build: ## builds binary with debug infos
 	cargo build
 
 .PHONY:release
-release: ## builds release
+release: ## builds release binary
 	cargo build --release
 
 .PHONY: install
