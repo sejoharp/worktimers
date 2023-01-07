@@ -96,7 +96,7 @@ fn main() {
         )
         .get_matches();
 
-    let config = Config::read_config(get_config().as_str());
+    let config = Config::read_config(get_config_path().as_str());
 
     if let Some(_matches) = matches.subcommand_matches("list") {
         list_command(config);
@@ -136,7 +136,7 @@ fn read_file(path: &str) -> String {
     fs::read_to_string(path).expect(format!("failed to read {}", path).as_str())
 }
 
-fn get_config() -> String {
+fn get_config_path() -> String {
     let home_directory = std::env::var("HOME").unwrap();
     format!("{}/{}", home_directory, ".worktimers.json")
 }
