@@ -1,5 +1,3 @@
-extern crate itertools;
-
 use std::fs;
 use std::ops::Sub;
 
@@ -8,6 +6,23 @@ use clap::{command, Command};
 use serde::{Deserialize, Serialize};
 use tabled::{Style, Table, Tabled};
 
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
+struct Config {
+    absolute_persistence_path: String,
+    lunch_break_in_mins: i64,
+}
+
+impl Config {
+    fn parse_into_config(json_data: String) -> Config {
+        let error_message = format!("failed to parse {}", json_data);
+        return serde_json::from_str(json_data.as_str()).expect(error_message.as_str());
+    }
+    fn read_config(config_path: &str) -> Config {
+        let input = read_file(config_path);
+
+        Config::parse_into_config(input)
+    }
+}
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
 struct Interval {
@@ -81,18 +96,20 @@ fn main() {
         )
         .get_matches();
 
+    let config = Config::read_config(get_config().as_str());
+
     if let Some(_matches) = matches.subcommand_matches("list") {
-        list_command();
+        list_command(config);
     } else if let Some(_matches) = matches.subcommand_matches("start") {
-        let mut intervals = read_intervals();
+        let mut intervals = read_intervals(config.absolute_persistence_path.as_str());
         start_command(&mut intervals);
-        save_to_file(&intervals);
-        list_command();
+        save_to_file(&intervals, config.absolute_persistence_path.clone());
+        list_command(config);
     } else if let Some(_matches) = matches.subcommand_matches("stop") {
-        let mut intervals = read_intervals();
+        let mut intervals = read_intervals(config.absolute_persistence_path.as_str());
         stop_command(&mut intervals);
-        save_to_file(&intervals);
-        list_command();
+        save_to_file(&intervals, config.absolute_persistence_path.clone());
+        list_command(config);
     }
 }
 
@@ -106,9 +123,9 @@ fn stop_command(intervals: &mut Vec<Interval>) {
     }
 }
 
-fn list_command() {
-    let intervals = read_intervals();
-    print_intervals(intervals, Some(get_lunch_break_duration()));
+fn list_command(config: Config) {
+    let intervals = read_intervals(config.absolute_persistence_path.as_str());
+    print_intervals(intervals, Some(Duration::minutes(config.lunch_break_in_mins)));
 }
 
 fn now() -> NaiveDateTime {
@@ -119,17 +136,13 @@ fn read_file(path: &str) -> String {
     fs::read_to_string(path).expect(format!("failed to read {}", path).as_str())
 }
 
-fn get_lunch_break_duration() -> Duration {
-    Duration::minutes(50)
-}
-
-fn get_persistance_path() -> String {
+fn get_config() -> String {
     let home_directory = std::env::var("HOME").unwrap();
-    format!("{}/{}", home_directory, "workingtimes.json")
+    format!("{}/{}", home_directory, ".worktimers.json")
 }
 
-fn read_intervals() -> Vec<Interval> {
-    let input = read_file(get_persistance_path().as_str());
+fn read_intervals(path: &str) -> Vec<Interval> {
+    let input = read_file(path);
 
     Interval::parse_intervals(input)
 }
@@ -139,12 +152,11 @@ fn print_intervals(intervals: Vec<Interval>, lunch_break: Option<Duration>) {
     DisplayInterval::print(cli_intervals);
 }
 
-fn save_to_file(intervals: &Vec<Interval>) {
-    let path = get_persistance_path();
+fn save_to_file(intervals: &Vec<Interval>, persistence_path: String) {
     fs::write(
-        path.clone(),
+        persistence_path.clone(),
         serde_json::to_string_pretty(&intervals).unwrap(),
-    ).expect(format!("Failed to save the intervals to {}", path).as_str())
+    ).expect(format!("Failed to save the intervals to {}", persistence_path).as_str())
 }
 
 fn format_duration(duration: &Duration) -> String {
@@ -162,6 +174,20 @@ mod tests {
 
     use super::*;
 
+    #[test]
+    fn parses_json_to_config() {
+        let data = r#"
+        {
+            "absolute_persistence_path": "/home/joscha/workingtimes.json",
+            "lunch_break_in_mins": 50
+        }"#;
+        let expected = Config {
+            absolute_persistence_path: "/home/joscha/workingtimes.json".to_string(),
+            lunch_break_in_mins: 50,
+        };
+
+        assert_eq!(Config::parse_into_config(data.to_string()), expected);
+    }
 
     #[test]
     fn creates_display_interval() {
