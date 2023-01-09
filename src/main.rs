@@ -269,6 +269,6 @@ mod tests {
             Interval { start: NaiveDateTime::default(), stop: Some(NaiveDateTime::default().add(Duration::hours(2))) },
             Interval { start: now().sub(Duration::hours(8)), stop: None }];
 
-        print_intervals(sample_intervals, None);
+        print_intervals(sample_intervals, Some(Duration::minutes(30)));
     }
 }
