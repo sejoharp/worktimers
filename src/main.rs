@@ -31,13 +31,17 @@ struct Interval {
 }
 
 impl Interval {
-    fn calculate_duration(&self, lunch_break_duration: Option<Duration>) -> Duration {
+    fn calculate_duration_with_lunch_break(&self, lunch_break_duration: Option<Duration>) -> Duration {
         self.stop
             .unwrap_or(now())
             .signed_duration_since(self.start)
             .sub(lunch_break_duration.unwrap_or(Duration::minutes(0)))
     }
-
+    fn calculate_duration(&self) -> Duration {
+        self.stop
+            .unwrap_or(now())
+            .signed_duration_since(self.start)
+    }
     fn parse_intervals(json_data: String) -> Vec<Interval> {
         let error_message = format!("failed to parse {}", json_data);
         return serde_json::from_str(json_data.as_str()).expect(error_message.as_str());
@@ -49,6 +53,7 @@ struct DisplayInterval {
     start: String,
     stop: String,
     duration: String,
+    duration_with_lunch_break: String,
 }
 
 impl DisplayInterval {
@@ -57,12 +62,14 @@ impl DisplayInterval {
             Some(stop) => DisplayInterval {
                 start: interval.start.to_string(),
                 stop: stop.to_string(),
-                duration: format_duration(&interval.calculate_duration(lunch_break)),
+                duration: format_duration(&interval.calculate_duration()),
+                duration_with_lunch_break: format_duration(&interval.calculate_duration_with_lunch_break(lunch_break)),
             },
             None => DisplayInterval {
                 start: interval.start.to_string(),
                 stop: "".to_string(),
-                duration: format_duration(&interval.calculate_duration(lunch_break)),
+                duration: format_duration(&interval.calculate_duration()),
+                duration_with_lunch_break: format_duration(&interval.calculate_duration_with_lunch_break(lunch_break)),
             }
         }
     }
@@ -199,6 +206,7 @@ mod tests {
             start: NaiveDateTime::default().add(Duration::hours(10)).to_string(),
             stop: NaiveDateTime::default().add(Duration::hours(12)).to_string(),
             duration: "02:00:00".to_string(),
+            duration_with_lunch_break: "02:00:00".to_string(),
         };
 
         let cli_interval = DisplayInterval::from_interval(&interval, None);
@@ -215,7 +223,7 @@ mod tests {
 
         let expected = Duration::hours(2).sub(Duration::minutes(30));
 
-        assert_eq!(interval.calculate_duration(Some(Duration::minutes(30))), expected);
+        assert_eq!(interval.calculate_duration_with_lunch_break(Some(Duration::minutes(30))), expected);
     }
 
     #[test]
@@ -225,7 +233,7 @@ mod tests {
             stop: Some(NaiveDateTime::default().add(Duration::hours(12))),
         };
 
-        assert_eq!(interval.calculate_duration(None), Duration::hours(2));
+        assert_eq!(interval.calculate_duration_with_lunch_break(None), Duration::hours(2));
     }
 
     #[test]
@@ -235,7 +243,7 @@ mod tests {
             stop: None,
         };
 
-        assert_eq!(interval.calculate_duration(None), Duration::hours(2));
+        assert_eq!(interval.calculate_duration_with_lunch_break(None), Duration::hours(2));
     }
 
     #[test]
