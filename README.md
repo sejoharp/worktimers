@@ -74,4 +74,4 @@ add `.worktimers.json` to your home directory and adjust the following content:
 1. bump the version in [Cargo.toml](Cargo.toml)
 1. create a commit with all changes
 1. tag the commit `git tag 0.2.0`
-1. git push && git push --tags
+1. `git push && git push --tags`
