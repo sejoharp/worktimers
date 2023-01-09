@@ -1,6 +1,6 @@
 # worktimers
 
-It's a cli tool to manages work times.
+It's a cli tool to manage work times.
 
 ## Usage
 
@@ -59,6 +59,7 @@ make install
 ### add config
 
 add `.worktimers.json` to your home directory and adjust the following content:
+
 ```json
 {
   "absolute_persistence_path": "/Users/joscha/workingtimes.json",
@@ -67,7 +68,9 @@ add `.worktimers.json` to your home directory and adjust the following content:
 ```
 
 ## Development
+
 ### create a release
+
 1. bump the version in [Cargo.toml](Cargo.toml)
 1. create a commit with all changes
 1. tag the commit `git tag 0.2.0`
