@@ -31,6 +31,15 @@ struct Interval {
 }
 
 impl Interval {
+    pub fn end_iteration(&self) -> Result<Interval, String> {
+        if self.start.date() != Local::today().naive_local() {
+            return Err("interval_not_from_today".to_string());
+        }
+        return Ok(Interval { start: self.start, stop: Some(now()) });
+    }
+}
+
+impl Interval {
     fn calculate_duration_with_lunch_break(&self, lunch_break_duration: Option<Duration>) -> Duration {
         self.stop
             .unwrap_or(now())
@@ -114,9 +123,14 @@ fn main() {
         list_command(config);
     } else if let Some(_matches) = matches.subcommand_matches("stop") {
         let mut intervals = read_intervals(config.absolute_persistence_path.as_str());
-        stop_command(&mut intervals);
-        save_to_file(&intervals, config.absolute_persistence_path.clone());
-        list_command(config);
+        let result = stop_command(&mut intervals);
+        match result {
+            Ok(_content) => {
+                save_to_file(&intervals, config.absolute_persistence_path.clone());
+                list_command(config);
+            }
+            Err(_message) => {}
+        }
     }
 }
 
@@ -124,9 +138,22 @@ fn start_command(intervals: &mut Vec<Interval>) {
     intervals.push(Interval { start: now(), stop: None });
 }
 
-fn stop_command(intervals: &mut Vec<Interval>) {
+fn stop_command(intervals: &mut Vec<Interval>) -> Result<(), String> {
     if let Some(interval) = intervals.pop() {
-        intervals.push(Interval { start: interval.start, stop: Some(now()) });
+        let result = interval.end_iteration();
+        match result {
+            Ok(interval) => {
+                intervals.push(interval);
+                Ok(())
+            }
+            Err(message) => {
+                println!("Please fix the current interval. It didn't start today.");
+                Err(message)
+            }
+        }
+    } else {
+        println!("No intervals found. Check config, or start an interval first.");
+        Err("no_intervals_found".to_string())
     }
 }
 
@@ -227,7 +254,7 @@ mod tests {
     }
 
     #[test]
-    fn calculates_duation() {
+    fn calculates_duration() {
         let interval = Interval {
             start: NaiveDateTime::default().add(Duration::hours(10)),
             stop: Some(NaiveDateTime::default().add(Duration::hours(12))),
@@ -252,6 +279,24 @@ mod tests {
 
         let formatted_duration = format_duration(&duration);
         assert_eq!(formatted_duration, "01:01:01");
+    }
+
+    #[test]
+    fn does_not_end_intervals_older_then_24h() {
+        let input = Interval { start: NaiveDateTime::default().sub(Duration::days(1)), stop: None };
+
+        let result: Result<Interval, String> = input.end_iteration();
+
+        assert_eq!(result, Err("interval_not_from_today".to_string()));
+    }
+
+    #[test]
+    fn ends_interval() {
+        let input = Interval { start: now().sub(Duration::hours(1)), stop: None };
+
+        let result: Result<Interval, String> = input.end_iteration();
+
+        assert_eq!(result, Ok(Interval { start: input.start, stop: Some(now()) }));
     }
 
     #[test]
