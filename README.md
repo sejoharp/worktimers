@@ -50,8 +50,13 @@ or
 brew install rustup-init
 ```
 
-### install worktimers
+### installation 
+#### binary
+1. download the latest release
+2. chmod +x worktimers
+3. move it to your PATH
 
+#### from source
 ```shell
 make install
 ```
