@@ -54,14 +54,12 @@ The output will look like this:
 
 ## Installation
 
-### install from source
-
-
 ### install release
 1. download the latest release
 2. chmod +x worktimers
 3. move it to your PATH
 
+### install from source
 ```shell
 # install rust
 brew install rustup-init
