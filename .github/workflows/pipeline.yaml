@@ -33,6 +33,9 @@ jobs:
       - name: Rename binary
         run: mv target/${{ matrix.architecture }}/release/worktimers target/${{ matrix.architecture }}/release/worktimers-${{ matrix.architecture }}
 
+      - name: make binary executable
+        run: mv chmod +x target/${{ matrix.architecture }}/release/worktimers-${{ matrix.architecture }}
+
       - name: Upload binary
         uses: softprops/action-gh-release@v2
         with:
