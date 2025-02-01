@@ -31,12 +31,12 @@ jobs:
         run: cargo build --release --target ${{ matrix.architecture }}
 
       - name: Rename binary
-        run: mv target/${{ matrix.architecture }}/release/worktimers target/${{ matrix.architecture }}/release/worktimers-darwin-${{ matrix.architecture }}
+        run: mv target/${{ matrix.architecture }}/release/worktimers target/${{ matrix.architecture }}/release/worktimers-${{ matrix.architecture }}
 
       - name: Upload binary
         uses: softprops/action-gh-release@v2
         with:
-          files: target/${{ matrix.architecture }}/release/worktimers-darwin-${{ matrix.architecture }}
+          files: target/${{ matrix.architecture }}/release/worktimers-${{ matrix.architecture }}
           tag_name: v1.0.${{ github.run_number }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
