@@ -2,6 +2,20 @@
 
 It's a cli tool to manage work times.
 
+<!-- TOC -->
+* [worktimers](#worktimers)
+  * [Usage](#usage)
+    * [start working](#start-working)
+    * [stop working](#stop-working)
+    * [list worked intervals](#list-worked-intervals)
+  * [Installation](#installation)
+    * [install from source](#install-from-source)
+    * [install release](#install-release)
+    * [add config](#add-config)
+  * [Development](#development)
+    * [create a release](#create-a-release)
+<!-- TOC -->
+
 ## Usage
 
 ### start working
@@ -40,24 +54,19 @@ The output will look like this:
 
 ## Installation
 
-### install rust
+### install from source
 
-https://www.rust-lang.org/tools/install
 
-or
-
-```shell
-brew install rustup-init
-```
-
-### installation 
-#### binary
+### install release
 1. download the latest release
 2. chmod +x worktimers
 3. move it to your PATH
 
-#### from source
 ```shell
+# install rust
+brew install rustup-init
+
+# build and install worktimers
 make install
 ```
 
@@ -75,8 +84,7 @@ add `.worktimers.json` to your home directory and adjust the following content:
 ## Development
 
 ### create a release
+1. make a commit 
+2. push it
+3. github actions will create a release
 
-1. bump the version in [Cargo.toml](Cargo.toml)
-1. create a commit with all changes
-1. tag the commit `git tag 0.2.0`
-1. `git push && git push --tags`
