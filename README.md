@@ -9,8 +9,8 @@ It's a cli tool to manage work times.
     * [stop working](#stop-working)
     * [list worked intervals](#list-worked-intervals)
   * [Installation](#installation)
+    * [use release](#use-release)
     * [install from source](#install-from-source)
-    * [install release](#install-release)
     * [add config](#add-config)
   * [Development](#development)
     * [create a release](#create-a-release)
@@ -55,9 +55,12 @@ The output will look like this:
 ## Installation
 
 ### install release
-1. download the latest release
-2. chmod +x worktimers
-3. move it to your PATH
+```bash
+# ARCH=[x86_64|aarch64]  bash -c "$(curl -fsSL https://raw.githubusercontent.com/sejoharp/worktimers/refs/heads/main/install.sh)"
+
+# example for x86_64:
+ARCH=x86_64 bash -c "$(curl -fsSL https://raw.githubusercontent.com/sejoharp/worktimers/refs/heads/main/install.sh)"
+```
 
 ### install from source
 ```shell
