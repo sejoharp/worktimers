@@ -9,10 +9,11 @@ else
   echo "Unsupported architecture: ${ARCH}"
   exit 1
 fi
+echo "detected arch: ${ARCH}"
 
-echo "selected arch: ${ARCH}"
 RELEASE_META_DATA_URL="https://api.github.com/repos/sejoharp/worktimers/releases/latest"
 BINARY_URL=$(curl -s ${RELEASE_META_DATA_URL} | jq -r ".assets[] | select(.name | contains(\"${ARCH}\")) | .browser_download_url")
+
 echo "downloading ${BINARY_URL}"
 curl -sLo worktimers ${BINARY_URL}
 echo "make it executable"
