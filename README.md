@@ -9,7 +9,7 @@ It's a cli tool to manage work times.
     * [stop working](#stop-working)
     * [list worked intervals](#list-worked-intervals)
   * [Installation](#installation)
-    * [use release](#use-release)
+    * [install release](#install-release)
     * [install from source](#install-from-source)
     * [add config](#add-config)
   * [Development](#development)
