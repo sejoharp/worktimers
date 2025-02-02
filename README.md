@@ -56,10 +56,7 @@ The output will look like this:
 
 ### install release
 ```bash
-# ARCH=[x86_64|aarch64]  bash -c "$(curl -fsSL https://raw.githubusercontent.com/sejoharp/worktimers/refs/heads/main/install.sh)"
-
-# example for x86_64:
-ARCH=x86_64 bash -c "$(curl -fsSL https://raw.githubusercontent.com/sejoharp/worktimers/refs/heads/main/install.sh)"
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/sejoharp/worktimers/refs/heads/main/install.sh)"
 ```
 
 ### install from source

@@ -1,4 +1,5 @@
-# Fetch the latest release and download the appropriate binary
+#!/usr/bin/env bash
+
 echo "selected arch: ${ARCH}"
 
 ARCH=$(uname -m)
