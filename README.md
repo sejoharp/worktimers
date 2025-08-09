@@ -56,7 +56,7 @@ The output will look like this:
 
 ### install release
 ```bash
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/sejoharp/worktimers/refs/heads/main/install.sh)"
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/sejoharp/worktimers/refs/heads/main/scripts/install.sh)"
 ```
 
 ### install from source
