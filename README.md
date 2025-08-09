@@ -81,15 +81,15 @@ nix build
 cd ~/.config/home-manager
 
 # add this as input;
-    actpkg = {
-      url = "github:sejoharp/act";
+    worktimers_pkg = {
+      url = "github:sejoharp/worktimers";
     };
 
 # optional: update index
-nix flake lock --update-input actpkg
+nix flake lock --update-input worktimers_pkg
 
 # add this to packages:
-inputs.reposyncpkg.packages.${pkgs.stdenv.system}.default
+inputs.worktimers_pkg.packages.${pkgs.stdenv.system}.default
 
 # build generation
 nh home build .
