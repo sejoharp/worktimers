@@ -1,42 +1,62 @@
-name: Build Rust Binary
+name: build releases
 
 on:
   push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
+  create_release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          draft: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   build:
-    runs-on: macos-latest
-
+    runs-on: ${{ matrix.os }}
+    needs: create_release
     strategy:
       matrix:
-        architecture: [x86_64-apple-darwin, aarch64-apple-darwin]
-
+        include:
+          - os: ubuntu-latest
+            arch: x86_64-unknown-linux-gnu
+          - os: ubuntu-24.04-arm
+            arch: aarch64-unknown-linux-gnu
+          - os: macos-latest
+            arch: x86_64-apple-darwin
+          - os: macos-latest
+            arch: aarch64-apple-darwin
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Rust
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          profile: minimal
-          target: ${{ matrix.architecture }}
+          target: ${{ matrix.arch }}
           toolchain: stable
 
       - name: Build Rust binary
-        run: cargo build --release --target ${{ matrix.architecture }}
+        run: cargo build --release --target ${{ matrix.arch }}
 
       - name: Rename binary
-        run: mv target/${{ matrix.architecture }}/release/worktimers target/${{ matrix.architecture }}/release/worktimers-${{ matrix.architecture }}
+        run: mv target/${{ matrix.arch }}/release/worktimers target/${{ matrix.arch }}/release/worktimers-${{ matrix.arch }}
 
       - name: Upload binary
         uses: softprops/action-gh-release@v2
         with:
-          files: target/${{ matrix.architecture }}/release/worktimers-${{ matrix.architecture }}
-          tag_name: v1.0.${{ github.run_number }}
+          files: target/${{ matrix.arch }}/release/worktimers-${{ matrix.arch }}
+          tag_name: ${{ github.ref_name }}
+          draft: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
