@@ -10,7 +10,7 @@ pub struct Interval {
 
 impl Interval {
     pub fn end_iteration(&self) -> Result<Interval, String> {
-        if self.start.date() != Local::today().naive_local() {
+        if self.start.date() != Local::now().naive_local().date() {
             return Err("interval_not_from_today".to_string());
         }
         return Ok(Interval {
