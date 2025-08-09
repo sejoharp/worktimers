@@ -3,17 +3,19 @@
 It's a cli tool to manage work times.
 
 <!-- TOC -->
-* [worktimers](#worktimers)
-  * [Usage](#usage)
-    * [start working](#start-working)
-    * [stop working](#stop-working)
-    * [list worked intervals](#list-worked-intervals)
-  * [Installation](#installation)
-    * [install release](#install-release)
-    * [install from source](#install-from-source)
-    * [add config](#add-config)
-  * [Development](#development)
-    * [create a release](#create-a-release)
+- [worktimers](#worktimers)
+  - [Usage](#usage)
+    - [start working](#start-working)
+    - [stop working](#stop-working)
+    - [list worked intervals](#list-worked-intervals)
+  - [Installation](#installation)
+    - [install release](#install-release)
+    - [install from source](#install-from-source)
+  - [install local with nix](#install-local-with-nix)
+  - [install via nix home-manager](#install-via-nix-home-manager)
+    - [add config](#add-config)
+  - [Development](#development)
+    - [create a release](#create-a-release)
 <!-- TOC -->
 
 ## Usage
@@ -68,6 +70,34 @@ brew install rustup-init
 make install
 ```
 
+## install local with nix
+```shell
+nix build
+```
+
+## install via nix home-manager
+```bash
+# move to home-manager config. e.g.:
+cd ~/.config/home-manager
+
+# add this as input;
+    actpkg = {
+      url = "github:sejoharp/act";
+    };
+
+# optional: update index
+nix flake lock --update-input actpkg
+
+# add this to packages:
+inputs.reposyncpkg.packages.${pkgs.stdenv.system}.default
+
+# build generation
+nh home build .
+
+# switch generation
+nh home switch .
+```
+
 ### add config
 
 add `.worktimers.json` to your home directory and adjust the following content:
@@ -81,8 +111,19 @@ add `.worktimers.json` to your home directory and adjust the following content:
 
 ## Development
 
-### create a release
-1. make a commit 
-2. push it
-3. github actions will create a release
 
+### create a release
+```bash
+# bump version (patch by default)
+make version-update
+
+# create a git commit
+git add ...
+git commit ...
+
+# tag the commit
+make tag-release
+
+# push commit and tag
+make push-release
+```
