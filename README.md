@@ -119,4 +119,7 @@ make create-minor-release
 
 # or bump patch version instead
 make create-patch-release
+
+# or bump major version instead
+make create-major-release
 ```
