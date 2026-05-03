@@ -114,16 +114,9 @@ add `.worktimers.json` to your home directory and adjust the following content:
 
 ### create a release
 ```bash
-# bump version (patch by default)
-make version-update
+# bump minor version, build, commit, tag, and push
+make create-minor-release
 
-# create a git commit
-git add ...
-git commit ...
-
-# tag the commit
-make tag-release
-
-# push commit and tag
-make push-release
+# or bump patch version instead
+make create-patch-release
 ```
